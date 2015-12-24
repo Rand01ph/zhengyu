@@ -1,4 +1,7 @@
-.gitignore:
+# customize
 *.pyc
-instance/
+instance/config.py
+app.log*
+celerybeat-schedule
+dump.rdb
 zhengyu

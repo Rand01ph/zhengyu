@@ -12,7 +12,7 @@ PHONE_NUMBER_TEXT = u"020-22810165"
 MENU_SETTING = {
     "button": [
         {
-            "name": "微官网",
+            "name": "我要了解",
             "sub_button": [
                 {
                     "type": "click",
@@ -35,13 +35,43 @@ MENU_SETTING = {
             ]
         },
         {
-            "type": "click",
-            "name": "服务中心",
-            "key": "center"
+            "name": "我要办理",
+            "sub_button": [
+                {
+                    "type": "click",
+                    "name": "财富问答",
+                    "key": "sign",
+                    "sub_button": []
+                },
+                {
+                    "type": "click",
+                    "name": "财富问答",
+                    "key": "sign",
+                    "sub_button": []
+                },
+                {
+                    "type": "click",
+                    "name": "财富问答",
+                    "key": "sign",
+                    "sub_button": []
+                }
+            ]
         },
         {
-            "name": "最新动态",
+            "name": "服务中心",
             "sub_button": [
+                {
+                    "type": "click",
+                    "name": "财富问答",
+                    "key": "sign",
+                    "sub_button": []
+                },
+                {
+                    "type": "click",
+                    "name": "财富问答",
+                    "key": "sign",
+                    "sub_button": []
+                },
                 {
                     "type": "click",
                     "name": "财富问答",
