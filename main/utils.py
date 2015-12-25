@@ -3,11 +3,7 @@
 
 from functools import wraps
 from flask import request, redirect
-import time
-from . import app, wechat
-
-
-current_milli_time = lambda: int(round(time.time() * 1000))
+from . import app, wechat, redis
 
 
 def check_signature(func):
@@ -31,6 +27,7 @@ def check_signature(func):
         return func(*args, **kwargs)
 
     return decorated_function
+
 
 def get_wechat_access_token():
     """获取 access_token"""

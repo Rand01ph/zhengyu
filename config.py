@@ -15,7 +15,11 @@ HELP_TEXT = u"\n\n点击\n服务中心－专属客服\n进入人工客服模式"
 
 ENTER_CUSTOMER_STATE_TEXT = u"已进入客服模式\n回复你想要咨询的问题\n\n回复“取消”退出咨询"
 
+CUSTOMER_OUTLINE_STATE_TEXT = u"客服暂时不在线，请稍后再来咨询"
+
 PHONE_NUMBER_TEXT = u"020-22810165"
+
+WORKING_TIME = "23-00-00"
 
 MENU_SETTING = {
     "button": [
@@ -49,7 +53,7 @@ MENU_SETTING = {
                 {
                     "type": "click",
                     "name": "商标注册",
-                    "key": "developing",
+                    "key": "template",
                     "sub_button": []
                 }
             ]

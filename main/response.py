@@ -17,17 +17,9 @@ def wechat_response(data):
     message = wechat.get_message()
     openid = message.source
 
-    # 设置下班时间
-    #TODO 集成进配置文件
-    working_time = datetime.time(23,30,0)
-    message_time = datetime.datetime.fromtimestamp(message.time).time()
-
     response = 'success'
 
     print message.raw
-
-    if message_time > working_time:
-        response = wechat.response_text('已经下班啦')
 
     if message.type == 'text':
         # 替换全角空格为半角空格
@@ -39,7 +31,8 @@ def wechat_response(data):
             u'取消': cancel_command,
             u'更新菜单': update_menu_setting,
             u'获取分组': get_user_group,
-            u'获取二维码': get_qcode
+            u'获取二维码': get_qcode,
+            u'客服': enter_customer_server
         }
 
         # 状态列表
@@ -96,6 +89,7 @@ def wechat_response(data):
         commands = {
             'customer': enter_customer_server,
             'developing': developing,
+            'template': template_message,
             'test': test
         }
         # 匹配指令后，重置状态
@@ -134,8 +128,15 @@ def usingnet_server():
 
 def enter_customer_server():
     """进入客服模式"""
-    set_user_state(openid, 'customer')
-    return wechat.response_text(app.config['ENTER_CUSTOMER_STATE_TEXT'])
+    # 设置下班时间
+    day_h, day_m, day_s = app.config['WORKING_TIME'].split('-')
+    working_time = datetime.time(int(day_h),int(day_m),int(day_s))
+    message_time = datetime.datetime.fromtimestamp(message.time).time()
+    if message_time > working_time:
+        return wechat.response_text('已经下班啦')
+    else:
+        set_user_state(openid, 'customer')
+        return wechat.response_text(app.config['ENTER_CUSTOMER_STATE_TEXT'])
 
 def update_menu_setting():
     """更新自定义菜单"""
@@ -145,6 +146,12 @@ def update_menu_setting():
         return wechat.response_text(e)
     else:
         return wechat.response_text('Done!')
+
+def template_message():
+    template_id=u"WYCLJc25ubEjXBZjOvWk6ihLOgtLQf6y3sv1PysrZdk"
+    data = {}
+    wechat.send_template_message(openid, template_id, data)
+    return 'success'
 
 def cancel_command():
     """取消状态"""
