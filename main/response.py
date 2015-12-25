@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import re
 from main import wechat, app
 import datetime
 import requests
 import json
 from .plugins.state import *
+from .plugins import usingnet
 
 def wechat_response(data):
     """微信消息处理回复"""
@@ -15,42 +17,79 @@ def wechat_response(data):
     message = wechat.get_message()
     openid = message.source
 
+    # 设置下班时间
+    #TODO 集成进配置文件
+    working_time = datetime.time(23,30,0)
+    message_time = datetime.datetime.fromtimestamp(message.time).time()
+
     response = 'success'
+
+    print message.raw
+
+    if message_time > working_time:
+        response = wechat.response_text('已经下班啦')
+
     if message.type == 'text':
         # 替换全角空格为半角空格
         message.content = message.content.replace(u'　', ' ')
         # 清除行首空格
         message.content = message.content.lstrip()
 
-        working_time = datetime.time(23,30,0)
-        message_time = datetime.datetime.fromtimestamp(message.time).time()
+        commands = {
+            u'取消': cancel_command,
+            u'更新菜单': update_menu_setting,
+            u'获取分组': get_user_group,
+            u'获取二维码': get_qcode
+        }
 
-        if message_time > working_time:
-            response = wechat.response_text('已经下班啦')
-        elif message.content == u'更新菜单':
-            response = update_menu_setting()
-        elif message.content == u'获取分组':
-            response = get_user_group()
-        elif message.content == u'获取二维码':
-            response = get_qcode()
-        else:
-            usingnet_post_url = app.config['USINGNET_MESSAGE_URL'] + app.config['APP_ID']
-            r = requests.post(usingnet_post_url, data=message.raw)
-            print message.raw
-            print r.status_code
-            response = wechat.response_text('请稍后，正在为你转接客服')
+        # 状态列表
+        state_commands = {
+            'customer': usingnet_server
+        }
+
+        # 匹配指令
+        command_match = False
+        for key_word in commands:
+            if re.match(key_word, message.content):
+                # 指令匹配后，设置默认状态
+                set_user_state(openid, 'default')
+                response = commands[key_word]()
+                command_match = True
+                break
+        if not command_match:
+            # 匹配状态
+            state = get_user_state(openid)
+            # 关键词、状态都不匹配，缺省回复
+            if state == 'default' or not state:
+                response = command_not_found()
+            else:
+                response = state_commands[state]()
+
+
+    elif message.type == 'image':
+        r = requests.post(usingnet_post_url, data=message.raw)
+        response = wechat.response_text('请稍后，正在为你转接客服')
+
+    elif message.type == 'voice':
+        r = requests.post(usingnet_post_url, data=message.raw)
+        response = wechat.response_text('请稍后，正在为你转接客服')
 
     elif message.type == 'click':
-        if message.key == 'phone_number':
-            response = phone_number()
-        elif message.key == 'score':
-            response = wechat.response_text('成绩功能测试中')
+        commands = {
+            'customer': enter_customer_server,
+            'developing': developing,
+            'test': test
+        }
+        # 匹配指令后，重置状态
+        set_user_state(openid, 'default')
+        response = commands[message.key]()
 
     elif message.type == 'subscribe':
         print message.key
         if message.key != None:
             groups_will_id = message.key.split('_')[1]
         wechat.move_user(openid, int(groups_will_id))
+        set_user_state(openid, 'default')
         response = subscribe()
 
     elif message.type == 'scan':
@@ -64,6 +103,21 @@ def wechat_response(data):
 
     return response
 
+def usingnet_server():
+    """优信客服服务"""
+    timeout = int(message.time) - int(get_user_last_interact_time(openid))
+    # 超过一段时间，退出模式
+    if timeout > 20 * 60:
+        set_user_state(openid, 'default')
+        return command_not_found()
+    else:
+        usingnet.chat.delay(openid, message.raw)
+        return 'success'
+
+def enter_customer_server():
+    """进入客服模式"""
+    set_user_state(openid, 'customer')
+    return wechat.response_text(app.config['ENTER_CUSTOMER_STATE_TEXT'])
 
 def update_menu_setting():
     """更新自定义菜单"""
@@ -73,6 +127,24 @@ def update_menu_setting():
         return wechat.response_text(e)
     else:
         return wechat.response_text('Done!')
+
+def cancel_command():
+    """取消状态"""
+    content = app.config['CANCEL_COMMAND_TEXT']
+    return wechat.response_text(content)
+
+def command_not_found():
+    """非关键词回复"""
+    content = app.config['COMMAND_NOT_FOUND_TEXT'] + app.config['HELP_TEXT']
+    return wechat.response_text(content)
+
+def developing():
+    """开发公告"""
+    return wechat.response_text('该功能开发中,敬请期待')
+
+def test():
+    """测试公告"""
+    return wechat.response_text('该功能测试中,如遇到BUG请像客服反馈')
 
 def get_user_group():
     """获取用户分组数据"""
