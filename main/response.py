@@ -67,12 +67,30 @@ def wechat_response(data):
 
 
     elif message.type == 'image':
-        r = requests.post(usingnet_post_url, data=message.raw)
-        response = wechat.response_text('请稍后，正在为你转接客服')
+        # 状态列表
+        state_commands = {
+            'customer': usingnet_server
+        }
+        # 匹配状态
+        state = get_user_state(openid)
+        # 关键词、状态都不匹配，缺省回复
+        if state == 'default' or not state:
+            response = command_not_found()
+        else:
+            response = state_commands[state]()
 
     elif message.type == 'voice':
-        r = requests.post(usingnet_post_url, data=message.raw)
-        response = wechat.response_text('请稍后，正在为你转接客服')
+        # 状态列表
+        state_commands = {
+            'customer': usingnet_server
+        }
+        # 匹配状态
+        state = get_user_state(openid)
+        # 关键词、状态都不匹配，缺省回复
+        if state == 'default' or not state:
+            response = command_not_found()
+        else:
+            response = state_commands[state]()
 
     elif message.type == 'click':
         commands = {
