@@ -49,6 +49,13 @@ def groups_qrcode_show():
         qr_str += '" /><br />'
     return qr_str
 
+@app.route('/userinfo/<openid>', methods=["GET"])
+def userinfo_for_usingnet(openid):
+    return jsonify(wechat.get_user_info(openid))
+
+@app.route('/groups/', methods=["GET"])
+def groups_for_usingnet():
+    return jsonify(wechat.get_groups())
 
 @app.errorhandler(404)
 def page_not_found(error):

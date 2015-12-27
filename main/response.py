@@ -3,9 +3,8 @@
 
 import re
 from main import wechat, app
+from .models import set_user_info
 import datetime
-import requests
-import json
 from .plugins.state import *
 from .plugins import usingnet
 
@@ -16,6 +15,9 @@ def wechat_response(data):
     wechat.parse_data(data)
     message = wechat.get_message()
     openid = message.source
+
+    # 用户信息写入数据库
+    set_user_info(openid)
 
     response = 'success'
 
