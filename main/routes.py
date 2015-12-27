@@ -51,7 +51,13 @@ def groups_qrcode_show():
 
 @app.route('/userinfo/<openid>', methods=["GET"])
 def userinfo_for_usingnet(openid):
-    return jsonify(wechat.get_user_info(openid))
+    user_info = wechat.get_user_info(openid)
+    group_id = user_info['groupid']
+    group_name = wechat.get_groups()['groups']
+    for i in group_name:
+        if i['id'] == group_id:
+            user_info["groupname"] = i['name']
+    return jsonify(user_info)
 
 @app.route('/groups/', methods=["GET"])
 def groups_for_usingnet():
