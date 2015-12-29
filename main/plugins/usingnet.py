@@ -13,6 +13,7 @@ default_answer = [u'么么哒', u'说啥呢……', u'纳尼……', u'=。=']
 def chat(openid, text):
     usingnet_post_url = app.config['USINGNET_MESSAGE_URL'] + app.config['APP_ID']
     try:
+        print text
         r = requests.post(usingnet_post_url, data=text)
         print r.status_code
     except Exception, e:

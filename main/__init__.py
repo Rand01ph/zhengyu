@@ -9,11 +9,16 @@ from logging.handlers import RotatingFileHandler
 from redis import Redis
 from wechat_sdk import WechatBasic
 from .plugins.queue import make_celery
+# Import the fixer
+from werkzeug.contrib.fixers import ProxyFix
 
 app = Flask(__name__, instance_relative_config=True)
 # 加载配置
 app.config.from_object('config')
 app.config.from_pyfile('config.py')
+
+# Use the fixer
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 # Flask-admin
 admin = Admin(app, name='zhengyu-wechat', template_mode='bootstrap3')

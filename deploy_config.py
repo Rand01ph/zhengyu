@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import os
-
-bind='127.0.0.1:8001' #绑定的端口
-workers=4 #worker数量
+# 绑定的端口
+bind='127.0.0.1:8001'
+# worker数量
+workers=3
 backlog=2048
+# sync, gevent,meinheld
+worker_class='gevent'
 debug=True
 proc_name='zhengyu.pid'
-pidfile='/home/tan/log/gunicorn/debug.log'
+pidfile='/home/tan/log/gunicorn/zhengyu.log'
 loglevel='debug'
