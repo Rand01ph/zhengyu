@@ -7,11 +7,11 @@ MAIN_URL = "http://zy.tanyawei.com/"
 
 WELCOME_TEXT = u"您好，这里是正誉官方微信。如有工商财税问题和工商会计事项办理进度可发微信进行提问，我们有专业的会计维护人员为您服务，紧急联系电话：020-22810165"
 
-COMMAND_NOT_FOUND_TEXT = u"收到你的留言啦！"
+COMMAND_NOT_FOUND_TEXT = u"正誉官方微信为您服务，如需人工服务"
 
 CANCEL_COMMAND_TEXT = u"已回到正常模式啦~\n"
 
-HELP_TEXT = u"\n\n点击\n服务中心－专属客服\n进入人工客服模式"
+HELP_TEXT = u"\n\n请点击菜单\n服务中心－专属客服\n或者回复“客服”\n进入人工客服模式"
 
 ENTER_CUSTOMER_STATE_TEXT = u"已进入客服模式\n回复你想要咨询的问题\n\n回复“取消”退出咨询"
 
