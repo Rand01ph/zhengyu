@@ -5,3 +5,4 @@ app.log*
 celerybeat-schedule
 dump.rdb
 zhengyu
+venv
