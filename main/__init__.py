@@ -4,8 +4,6 @@
 from flask import Flask
 
 from flask_admin import Admin
-from flask_admin.contrib import rediscli
-from flask_admin.contrib.sqla import ModelView
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -27,8 +25,6 @@ app.config.from_pyfile('config.py')
 # Flask-admin
 # Flask and Flask-SQLAlchemy initialization here
 admin = Admin(app, name='zhengyu-wechat', template_mode='bootstrap3')
-# Add administrative views here
-admin.add_view(rediscli.RedisCli(Redis()))
 
 # 队列
 celery = make_celery(app)
@@ -60,3 +56,5 @@ if not redis.exists("wechat:access_token"):
 from .routes import *
 # 定时任务
 from .plugins.cron import *
+# 视图
+from .views import dashboard

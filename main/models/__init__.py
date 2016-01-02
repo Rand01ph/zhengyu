@@ -8,7 +8,6 @@ db = SQLAlchemy(app)
 
 from .user import *
 
-
 def set_user_info(openid):
     """保存用户信息"""
     redis_prefix = "wechat:user:"
