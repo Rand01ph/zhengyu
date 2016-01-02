@@ -2,15 +2,19 @@
 # encoding: utf-8
 
 from flask import Flask
+
 from flask_admin import Admin
 from flask_admin.contrib import rediscli
+from flask_admin.contrib.sqla import ModelView
+
 import logging
 from logging.handlers import RotatingFileHandler
+
 from redis import Redis
 from wechat_sdk import WechatBasic
 from .plugins.queue import make_celery
 # Import the fixer
-from werkzeug.contrib.fixers import ProxyFix
+#from werkzeug.contrib.fixers import ProxyFix
 
 app = Flask(__name__, instance_relative_config=True)
 # 加载配置
@@ -18,9 +22,10 @@ app.config.from_object('config')
 app.config.from_pyfile('config.py')
 
 # Use the fixer
-app.wsgi_app = ProxyFix(app.wsgi_app)
+#app.wsgi_app = ProxyFix(app.wsgi_app)
 
 # Flask-admin
+# Flask and Flask-SQLAlchemy initialization here
 admin = Admin(app, name='zhengyu-wechat', template_mode='bootstrap3')
 # Add administrative views here
 admin.add_view(rediscli.RedisCli(Redis()))
@@ -47,6 +52,7 @@ wechat = WechatBasic(appid=app.config['APP_ID'],
 
 if not redis.exists("wechat:access_token"):
     # access_token 写入缓存
+    wechat.grant_jsapi_ticket()
     redis.set("wechat:access_token",
               wechat.get_access_token()['access_token'], 7000)
 

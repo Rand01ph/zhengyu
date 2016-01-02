@@ -2,6 +2,9 @@
 # encoding: utf-8
 
 import requests
+from requests.packages.urllib3.util import Retry
+from requests.adapters import HTTPAdapter
+from requests import Session, exceptions
 import random
 from .. import app, celery
 from . import wechat_custom
@@ -9,12 +12,17 @@ from . import wechat_custom
 default_answer = [u'么么哒', u'说啥呢……', u'纳尼……', u'=。=']
 
 
-@celery.task
+@celery.task()
 def chat(openid, text):
     usingnet_post_url = app.config['USINGNET_MESSAGE_URL'] + app.config['APP_ID']
     try:
         print text
-        r = requests.post(usingnet_post_url, data=text)
+        s = Session()
+        s.mount(app.config['USINGNET_MESSAGE_URL'], HTTPAdapter(
+            max_retries=Retry(total=5, status_forcelist=[500, 503])
+            )
+        )
+        r = s.post(usingnet_post_url, data=text)
         print r.status_code
     except Exception, e:
         app.logger.warning(u"usingnet customer请求或解析失败: %s, text: %s" % (e, text))

@@ -3,6 +3,8 @@
 
 from . import db
 from datetime import datetime
+from .. import admin
+from flask_admin.contrib.sqla import ModelView
 
 
 class User(db.Model):
@@ -46,3 +48,6 @@ class User(db.Model):
     def update(self):
         db.session.commit()
         return self
+
+
+admin.add_view(ModelView(User, db.session))

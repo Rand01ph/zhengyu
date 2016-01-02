@@ -17,7 +17,7 @@ def wechat_response(data):
     openid = message.source
 
     # 用户信息写入数据库
-    set_user_info(openid)
+    #set_user_info(openid)
 
     response = 'success'
 
@@ -99,11 +99,11 @@ def wechat_response(data):
         response = commands[message.key]()
 
     elif message.type == 'subscribe':
-        print message.key
-        if message.key != None:
-            groups_will_id = message.key.split('_')[1]
-        wechat.move_user(openid, int(groups_will_id))
-        set_user_state(openid, 'default')
+        #  print message.key
+        #  if message.key != None:
+            #  groups_will_id = message.key.split('_')[1]
+        #  wechat.move_user(openid, int(groups_will_id))
+        #  set_user_state(openid, 'default')
         response = subscribe()
 
     elif message.type == 'scan':
