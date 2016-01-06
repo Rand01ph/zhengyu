@@ -2,7 +2,8 @@
 # encoding: utf-8
 
 from flask import request, render_template, jsonify, Markup, abort, \
-        send_from_directory
+        send_from_directory, Response
+import json
 from . import app, wechat, redis
 from .utils import check_signature
 from .response import wechat_response
@@ -27,6 +28,7 @@ def update_access_token():
     """
     # 由于 wechat-python-sdk 中，generate_jsapi_signature -> grant_jsapi_ticket
     # 会顺带把 access_token 刷新了，所以先 grant_jsapi_ticket 再读取 access_token
+    wechat.grant_jsapi_ticket()
     token = wechat.get_access_token()
     access_token = token['access_token']
     # 存入缓存，设置过期时间
@@ -49,15 +51,20 @@ def groups_qrcode_show():
         qr_str += '" /><br />'
     return qr_str
 
-@app.route('/userinfo/<openid>', methods=["GET"])
-def userinfo_for_usingnet(openid):
-    user_info = wechat.get_user_info(openid)
+@app.route('/userinfo', methods=["GET"])
+def userinfo_for_usingnet():
+    id = request.args.get('openid')
+    tags = []
+    user_info = wechat.get_user_info(id)
     group_id = user_info['groupid']
     group_name = wechat.get_groups()['groups']
     for i in group_name:
         if i['id'] == group_id:
-            user_info["groupname"] = i['name']
-    return jsonify(user_info)
+            tags.append(i['name'])
+    user_info["tags"] = tags
+    js = {"OK" : True, "data": user_info}
+    return Response(json.dumps(js, sort_keys=True, indent=2),  mimetype='application/json')
+#    return jsonify(user_info)
 
 @app.route('/groups/', methods=["GET"])
 def groups_for_usingnet():

@@ -17,7 +17,7 @@ def wechat_response(data):
     openid = message.source
 
     # 用户信息写入数据库
-    set_user_info(openid)
+    #set_user_info(openid)
 
     response = 'success'
 
@@ -113,6 +113,7 @@ def wechat_response(data):
 
     # 保存最后一次交互的时间
     print openid
+
     set_user_last_interact_time(openid, message.time)
 
     return response
