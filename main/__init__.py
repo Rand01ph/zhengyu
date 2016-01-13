@@ -5,6 +5,7 @@ from flask import Flask
 
 from flask_admin import Admin
 
+import time
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -51,6 +52,22 @@ if not redis.exists("wechat:access_token"):
     wechat.grant_jsapi_ticket()
     redis.set("wechat:access_token",
               wechat.get_access_token()['access_token'], 7000)
+
+#  # 初始化微信 SDK
+#  if not redis.exists("wechat:access_token"):
+    #  # 初始化微信实例
+    #  wechat = WechatBasic(appid=app.config['APP_ID'],
+                        #  appsecret=app.config['APP_SECRET'],
+                        #  token=app.config['TOKEN'])
+    #  d = wechat.grant_token()
+    #  token = d['access_token']
+    #  expired_at = d['access_token_expires_at']
+    #  redis.set("wechat:access_token", token, (expired_at - time.time())*60)
+    #  redis.set("wechat:access_token_expires_at", expired_at, (expired_at - time.time())*60)
+#  else:
+    #  wechat = WechatBasic(appid=app.config['APP_ID'],
+                        #  appsecret=app.config['APP_SECRET'],
+                        #  token=app.config['TOKEN'])
 
 # 路由
 from .routes import *

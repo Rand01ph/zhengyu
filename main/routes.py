@@ -24,11 +24,9 @@ def handle_wechat_request():
 @app.route(app.config['UPDATE_ACCESS_TOKEN_URL_ROUTE'], methods=["GET"])
 def update_access_token():
     """
-    读取微信最新 access_token，写入缓存
+    刷新微信 access_token，写入缓存
     """
-    # 由于 wechat-python-sdk 中，generate_jsapi_signature -> grant_jsapi_ticket
-    # 会顺带把 access_token 刷新了，所以先 grant_jsapi_ticket 再读取 access_token
-    wechat.grant_jsapi_ticket()
+    wechat.grant_token()
     token = wechat.get_access_token()
     access_token = token['access_token']
     # 存入缓存，设置过期时间
@@ -62,6 +60,13 @@ def userinfo_for_usingnet():
         if i['id'] == group_id:
             tags.append(i['name'])
     user_info["tags"] = tags
+
+    user_info.setdefault("name", user_info["nickname"])
+    del(user_info["nickname"])
+
+    user_info["email"] = ""
+    user_info["phone"] = ""
+
     js = {"OK" : True, "data": user_info}
     return Response(json.dumps(js, sort_keys=True, indent=2),  mimetype='application/json')
 #    return jsonify(user_info)
@@ -69,6 +74,10 @@ def userinfo_for_usingnet():
 @app.route('/groups/', methods=["GET"])
 def groups_for_usingnet():
     return jsonify(wechat.get_groups())
+
+@app.route('/material_lis/', methods=["GET"])
+def material_lis():
+    return jsonify(wechat.get_material_list("image"))
 
 @app.errorhandler(404)
 def page_not_found(error):

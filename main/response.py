@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import re
 from main import wechat, app
 from .models import set_user_info
-import datetime
+import datetime, re
 from .plugins.state import *
 from .plugins import usingnet
 
@@ -17,7 +16,7 @@ def wechat_response(data):
     openid = message.source
 
     # 用户信息写入数据库
-    #set_user_info(openid)
+    # set_user_info(openid)
 
     response = 'success'
 
@@ -30,80 +29,92 @@ def wechat_response(data):
         message.content = message.content.lstrip()
 
         commands = {
-            u'取消': cancel_command,
+            #  u'取消': cancel_command,
             u'更新菜单': update_menu_setting,
             u'获取分组': get_user_group,
-            u'获取二维码': get_qcode,
-            u'客服': enter_customer_server
+            u'获取二维码': get_qcode
+            #  u'客服': enter_customer_server
         }
 
-        # 状态列表
-        state_commands = {
-            'customer': usingnet_server
-        }
+        #  # 状态列表
+        #  state_commands = {
+            #  'customer': usingnet_server
+        #  }
 
-        # 匹配指令
-        command_match = False
+        #  # 匹配指令
+        #  command_match = False
+        #  for key_word in commands:
+            #  if re.match(key_word, message.content):
+                #  # 指令匹配后，设置默认状态
+                #  # 一直处于客服模式
+                #  set_user_state(openid, 'customer')
+                #  response = commands[key_word]()
+                #  command_match = True
+                #  break
+        #  if not command_match:
+            #  # 匹配状态
+            #  state = get_user_state(openid)
+            #  # 关键词、状态都不匹配，缺省回复
+            #  if state == 'default' or not state:
+                #  response = command_not_found()
+            #  else:
+                #  response = state_commands[state]()
         for key_word in commands:
             if re.match(key_word, message.content):
-                # 指令匹配后，设置默认状态
-                set_user_state(openid, 'default')
                 response = commands[key_word]()
-                command_match = True
                 break
-        if not command_match:
-            # 匹配状态
-            state = get_user_state(openid)
-            # 关键词、状态都不匹配，缺省回复
-            if state == 'default' or not state:
-                response = command_not_found()
-            else:
-                response = state_commands[state]()
-
+        response = usingnet_server()
 
     elif message.type == 'image':
-        # 状态列表
-        state_commands = {
-            'customer': usingnet_server
-        }
-        # 匹配状态
-        state = get_user_state(openid)
-        # 关键词、状态都不匹配，缺省回复
-        if state == 'default' or not state:
-            response = command_not_found()
-        else:
-            response = state_commands[state]()
+        #  # 状态列表
+        #  state_commands = {
+            #  'customer': usingnet_server
+        #  }
+        #  # 匹配状态
+        #  state = get_user_state(openid)
+        #  # 关键词、状态都不匹配，缺省回复
+        #  if state == 'default' or not state:
+            #  response = command_not_found()
+        #  else:
+            #  response = state_commands[state]()
+        response = usingnet_server()
 
     elif message.type == 'voice':
-        # 状态列表
-        state_commands = {
-            'customer': usingnet_server
-        }
-        # 匹配状态
-        state = get_user_state(openid)
-        # 关键词、状态都不匹配，缺省回复
-        if state == 'default' or not state:
-            response = command_not_found()
-        else:
-            response = state_commands[state]()
+        #  # 状态列表
+        #  state_commands = {
+            #  'customer': usingnet_server
+        #  }
+        #  # 匹配状态
+        #  state = get_user_state(openid)
+        #  # 关键词、状态都不匹配，缺省回复
+        #  if state == 'default' or not state:
+            #  response = command_not_found()
+        #  else:
+            #  response = state_commands[state]()
+        response = usingnet_server()
 
     elif message.type == 'click':
         commands = {
             'customer': enter_customer_server,
             'developing': developing,
             'template': template_message,
-            'test': test
+            'test': test,
+            'faq': faq,
+            'zhuanjia': zhuanjia,
+            'tousu': tousu,
+            'wechat_account': wechat_account,
+            'business_account': business_account
         }
         # 匹配指令后，重置状态
-        set_user_state(openid, 'default')
+        set_user_state(openid, 'customer')
         response = commands[message.key]()
 
     elif message.type == 'subscribe':
         print message.key
         if message.key != None:
             groups_will_id = message.key.split('_')[1]
-        wechat.move_user(openid, int(groups_will_id))
-        set_user_state(openid, 'default')
+            wechat.move_user(openid, int(groups_will_id))
+        set_user_state(openid, 'customer')
         response = subscribe()
 
     elif message.type == 'scan':
@@ -120,14 +131,14 @@ def wechat_response(data):
 
 def usingnet_server():
     """优信客服服务"""
-    timeout = int(message.time) - int(get_user_last_interact_time(openid))
-    # 超过一段时间，退出模式
-    if timeout > 20 * 60:
-        set_user_state(openid, 'default')
-        return command_not_found()
-    else:
-        usingnet.chat.delay(openid, message.raw)
-        return 'success'
+    #  timeout = int(message.time) - int(get_user_last_interact_time(openid))
+    #  # 超过一段时间，退出模式
+    #  if timeout > 20 * 60:
+        #  set_user_state(openid, 'default')
+        #  return command_not_found()
+    #  else:
+    usingnet.chat.delay(openid, message.raw)
+    return 'success'
 
 def enter_customer_server():
     """进入客服模式"""
@@ -136,7 +147,7 @@ def enter_customer_server():
     working_time = datetime.time(int(day_h),int(day_m),int(day_s))
     message_time = datetime.datetime.fromtimestamp(message.time).time()
     if message_time > working_time:
-        return wechat.response_text('已经下班啦')
+        return wechat.response_text('已经下班啦\n工作时间8:30-18:00')
     else:
         set_user_state(openid, 'customer')
         return wechat.response_text(app.config['ENTER_CUSTOMER_STATE_TEXT'])
@@ -155,6 +166,25 @@ def template_message():
     data = {}
     wechat.send_template_message(openid, template_id, data)
     return 'success'
+
+def faq():
+    content = app.config['FAQ_TEXT']
+    return wechat.response_text(content)
+
+def zhuanjia():
+    content = app.config['FAQ_TEXT']
+    return wechat.response_text(content)
+
+def tousu():
+    content = app.config['FAQ_TEXT']
+    return wechat.response_text(content)
+
+def wechat_account():
+    return wechat.response_image(app.config['WECHAT_ACCOUNT_MEDIA_ID'])
+
+def business_account():
+    content = app.config['BUSINESS_ACCOUNT_INFO_TEXT']
+    return wechat.response_text(content)
 
 def cancel_command():
     """取消状态"""

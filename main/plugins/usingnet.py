@@ -6,10 +6,9 @@ from requests.packages.urllib3.util import Retry
 from requests.adapters import HTTPAdapter
 from requests import Session, exceptions
 import random
-from .. import app, celery
-from . import wechat_custom
+from .. import app, celery, wechat
 
-default_answer = [u'么么哒', u'说啥呢……', u'纳尼……', u'=。=']
+default_answer = [u'么么哒', u'纳尼……', u'=。=', u'客服接口出错啦']
 
 
 @celery.task()
@@ -26,12 +25,14 @@ def chat(openid, text):
         print r.status_code
     except Exception, e:
         app.logger.warning(u"usingnet customer请求或解析失败: %s, text: %s" % (e, text))
-        return wechat_custom.send_text(openid, random.choice(default_answer))
+        #  return wechat_custom.send_text(openid, random.choice(default_answer))
+        wechat.send_text_message(openid, random.choice(default_answer))
 
     if online(openid):
         pass
     else:
-        return wechat_custom.send_text(openid, app.config['CUSTOMER_OUTLINE_STATE_TEXT'])
+        #  return wechat_custom.send_text(openid, app.config['CUSTOMER_OUTLINE_STATE_TEXT'])
+        wechat.send_text_message(openid, app.config['CUSTOMER_OUTLINE_STATE_TEXT'])
 
 
 def online(openid):
@@ -41,7 +42,8 @@ def online(openid):
         online_data = r.json()['data']
     except Exception, e:
         app.logger.warning(u"usingnet online api请求或解析失败: %s: %s" % e)
-        return wechat_custom.send_text(openid, random.choice(default_answer))
+        #return wechat_custom.send_text(openid, random.choice(default_answer))
+        wechat.send_text_message(openid, random.choice(default_answer))
 
     if online_data:
         return True
