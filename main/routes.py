@@ -51,9 +51,18 @@ def groups_qrcode_show():
 
 @app.route('/userinfo', methods=["GET"])
 def userinfo_for_usingnet():
-    id = request.args.get('openid')
+    user_id = request.args.get('openid')
     tags = []
-    user_info = wechat.get_user_info(id)
+    user_info = wechat.get_user_info(user_id)
+    if "openid" not in user_info:
+        content = u"获取用户信息失败: %s\n用户ID：%s"
+        app.logger.warning(content % (user_info, user_id))
+        if user_info["errcode"] == 40001:
+            # access_token 失效，更新
+            update_access_token()
+            # 再次获取
+            user_info = wechat.get_user_info(user_id)
+
     group_id = user_info['groupid']
     group_name = wechat.get_groups()['groups']
     for i in group_name:
