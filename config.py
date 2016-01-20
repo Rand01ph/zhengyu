@@ -33,9 +33,9 @@ MENU_SETTING = {
             "name": "公司业务",
             "sub_button": [
                 {
-                    "type": "click",
+                    "type": "view",
                     "name": "公司网站",
-                    "key": "developing",
+                    "url": "http://zhengyu.tanyawei.com/index.html",
                     "sub_button": []
                 },
                 {

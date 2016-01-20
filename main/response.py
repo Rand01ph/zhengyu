@@ -63,7 +63,8 @@ def wechat_response(data):
             if re.match(key_word, message.content):
                 response = commands[key_word]()
                 break
-        response = usingnet_server()
+        #  response = usingnet_server()
+        response = wechat.group_transfer_message()
 
     elif message.type == 'image':
         #  # 状态列表
@@ -77,7 +78,8 @@ def wechat_response(data):
             #  response = command_not_found()
         #  else:
             #  response = state_commands[state]()
-        response = usingnet_server()
+        #  response = usingnet_server()
+        response = wechat.group_transfer_message()
 
     elif message.type == 'voice':
         #  # 状态列表
@@ -91,7 +93,8 @@ def wechat_response(data):
             #  response = command_not_found()
         #  else:
             #  response = state_commands[state]()
-        response = usingnet_server()
+        #  response = usingnet_server()
+        response = wechat.group_transfer_message()
 
     elif message.type == 'click':
         commands = {

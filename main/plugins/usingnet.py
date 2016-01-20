@@ -25,13 +25,11 @@ def chat(openid, text):
         print r.status_code
     except Exception, e:
         app.logger.warning(u"usingnet customer请求或解析失败: %s, text: %s" % (e, text))
-        #  return wechat_custom.send_text(openid, random.choice(default_answer))
         wechat.send_text_message(openid, random.choice(default_answer))
 
     if online(openid):
         pass
     else:
-        #  return wechat_custom.send_text(openid, app.config['CUSTOMER_OUTLINE_STATE_TEXT'])
         wechat.send_text_message(openid, app.config['CUSTOMER_OUTLINE_STATE_TEXT'])
 
 
@@ -42,7 +40,6 @@ def online(openid):
         online_data = r.json()['data']
     except Exception, e:
         app.logger.warning(u"usingnet online api请求或解析失败: %s: %s" % e)
-        #return wechat_custom.send_text(openid, random.choice(default_answer))
         wechat.send_text_message(openid, random.choice(default_answer))
 
     if online_data:

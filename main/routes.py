@@ -7,6 +7,7 @@ import json
 from . import app, wechat, redis
 from .utils import check_signature
 from .response import wechat_response
+from wechat_sdk.exceptions import OfficialAPIError
 
 @app.route("/", methods=['GET', 'POST'])
 @check_signature
@@ -53,15 +54,27 @@ def groups_qrcode_show():
 def userinfo_for_usingnet():
     user_id = request.args.get('openid')
     tags = []
-    user_info = wechat.get_user_info(user_id)
-    if "openid" not in user_info:
-        content = u"获取用户信息失败: %s\n用户ID：%s"
-        app.logger.warning(content % (user_info, user_id))
-        if user_info["errcode"] == 40001:
-            # access_token 失效，更新
-            update_access_token()
-            # 再次获取
-            user_info = wechat.get_user_info(user_id)
+    try:
+        wechat.get_user_info(user_id)
+    except OfficialAPIError, e:
+        content = u"获取用户信息失败，错误信息： %s\n用户ID：%s"
+        app.logger.warning(content % (e, user_id))
+        wechat.grant_token()
+        token = wechat.get_access_token()
+        access_token = token['access_token']
+        # 存入缓存，设置过期时间
+        redis.set("wechat:access_token", access_token, 7000)
+    finally:
+        user_info = wechat.get_user_info(user_id)
+
+    #  if "openid" not in user_info:
+        #  content = u"获取用户信息失败: %s\n用户ID：%s"
+        #  app.logger.warning(content % (user_info, user_id))
+        #  if user_info["errcode"] == 40001:
+            #  # access_token 失效，更新
+            #  update_access_token()
+            #  # 再次获取
+            #  user_info = wechat.get_user_info(user_id)
 
     group_id = user_info['groupid']
     group_name = wechat.get_groups()['groups']
