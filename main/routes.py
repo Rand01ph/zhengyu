@@ -101,6 +101,15 @@ def groups_for_usingnet():
 def material_lis():
     return jsonify(wechat.get_material_list("image"))
 
+@app.route('/update_menu_setting/', methods=["GET"])
+def update_menu():
+    try:
+        wechat.create_menu(app.config['MENU_SETTING'])
+    except Exception, e:
+        return e
+    else:
+        return "Update menu OK"
+
 @app.errorhandler(404)
 def page_not_found(error):
     return "page not found!"
